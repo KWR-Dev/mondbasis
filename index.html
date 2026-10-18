@@ -1,0 +1,283 @@
+<!doctype html>
+<html lang="de">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Mondbasis – Lichtsensor-Werkstatt</title>
+  <meta name="description" content="Eine Mondbasis mit Rakete, die live auf einen Lichtsensor am ESP32 reagiert – mit Bauplan und Stromfluss.">
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+<div class="seite">
+
+  <header class="kopf">
+    <div class="titel">
+      <h1>🚀 Mondbasis</h1>
+      <p class="untertitel">Ein Lichtsensor schaltet das Licht der Mondbasis – und startet die Rakete!</p>
+    </div>
+    <div class="verbindung">
+      <span id="status" class="status status-sim" role="status">Simulation</span>
+      <button id="btnVerbinden" class="knopf knopf-haupt" type="button">Mit ESP32 verbinden</button>
+      <button id="btnTrennen" class="knopf" type="button" hidden>Trennen</button>
+    </div>
+  </header>
+
+  <p id="meldung" class="meldung" aria-live="polite" hidden></p>
+
+  <main>
+    <section class="steuerung" aria-label="Sensor und Modus">
+      <div class="karte sensor">
+        <div class="karte-kopf">
+          <h2>Lichtsensor</h2>
+          <span class="wert"><span id="ldrWert">–</span> <small>von 4095</small></span>
+        </div>
+
+        <div id="balken" class="balken" role="meter" aria-label="Messwert des Lichtsensors"
+             aria-valuemin="0" aria-valuemax="4095" aria-valuenow="0">
+          <div id="balkenFuellung" class="balken-fuellung"></div>
+          <div id="markeDunkel" class="marke marke-dunkel"><span>Licht an unter <b id="txtDunkel">1200</b></span></div>
+          <div id="markeHell" class="marke marke-hell"><span>Licht aus über <b id="txtHell">1600</b></span></div>
+        </div>
+        <div class="balken-skala"><span>🌑 dunkel</span><span>hell ☀️</span></div>
+
+        <label id="reglerBox" class="regler">
+          <span class="regler-titel">Helligkeit <small>(Simulation)</small></span>
+          <input id="helligkeit" type="range" min="0" max="4095" step="1" value="2600">
+        </label>
+        <p id="reglerHinweis" class="hinweis" hidden>Jetzt misst der echte Sensor. Halte deine Hand darüber!</p>
+      </div>
+
+      <div class="karte modus">
+        <h2>Modus</h2>
+        <div class="modus-knoepfe" role="group" aria-label="Modus wählen">
+          <button class="knopf modus-knopf" type="button" data-modus="auto" aria-pressed="true"><span aria-hidden="true">🤖</span>Automatik</button>
+          <button class="knopf modus-knopf" type="button" data-modus="on" aria-pressed="false"><span aria-hidden="true">💡</span>Dauer-an</button>
+          <button class="knopf modus-knopf" type="button" data-modus="off" aria-pressed="false"><span aria-hidden="true">🌙</span>Dauer-aus</button>
+        </div>
+        <p id="zustandText" class="zustand">Es ist hell ☀️ – darum sind die LEDs aus.</p>
+      </div>
+    </section>
+
+    <div class="tabs" role="tablist" aria-label="Ansicht">
+      <button id="tabMond" class="tab" role="tab" type="button" aria-selected="true" aria-controls="panelMond">🌕 Mondbasis</button>
+      <button id="tabBau" class="tab" role="tab" type="button" aria-selected="false" aria-controls="panelBau" tabindex="-1">🔌 Bauplan</button>
+    </div>
+
+    <!-- Teil 1: Mondszene -->
+    <section id="panelMond" class="panel" role="tabpanel" aria-labelledby="tabMond">
+      <svg id="szene" class="szene" viewBox="0 0 800 450" role="img" aria-labelledby="szeneTitel szeneBeschr" data-phase="rampe">
+        <title id="szeneTitel">Mondbasis mit Rakete</title>
+        <desc id="szeneBeschr">Eine Mondbasis mit zwei Fenstern und eine Rakete auf der Startrampe. Wird es dunkel, gehen die Fenster an und die Rakete startet.</desc>
+        <defs>
+          <linearGradient id="himmelVerlauf" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0" class="himmel-oben"/>
+            <stop offset="1" class="himmel-unten"/>
+          </linearGradient>
+          <linearGradient id="bodenVerlauf" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0" stop-color="#b6b9c5"/>
+            <stop offset="1" stop-color="#6b6e7a"/>
+          </linearGradient>
+          <linearGradient id="kuppelVerlauf" x1="0" y1="0" x2="1" y2="1">
+            <stop offset="0" stop-color="#f4f7fc"/>
+            <stop offset="1" stop-color="#a7b0c3"/>
+          </linearGradient>
+          <radialGradient id="scheinVerlauf">
+            <stop offset="0" stop-color="#ffd25a" stop-opacity=".8"/>
+            <stop offset="1" stop-color="#ffd25a" stop-opacity="0"/>
+          </radialGradient>
+          <radialGradient id="erdeSchein">
+            <stop offset=".68" stop-color="#7cc4ff" stop-opacity=".55"/>
+            <stop offset="1" stop-color="#7cc4ff" stop-opacity="0"/>
+          </radialGradient>
+          <linearGradient id="flammeVerlauf" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0" stop-color="#fff3b0"/>
+            <stop offset=".45" stop-color="#ffaa2e"/>
+            <stop offset="1" stop-color="#ff4d1a" stop-opacity="0"/>
+          </linearGradient>
+          <linearGradient id="strahlVerlauf" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0" stop-color="#9dffb0" stop-opacity=".75"/>
+            <stop offset="1" stop-color="#9dffb0" stop-opacity=".08"/>
+          </linearGradient>
+          <clipPath id="erdeClip"><circle cx="690" cy="85" r="30"/></clipPath>
+        </defs>
+
+        <!-- Himmel und Sterne -->
+        <rect width="800" height="450" fill="url(#himmelVerlauf)"/>
+        <g id="sterne" class="sterne"></g>
+
+        <!-- Erde -->
+        <circle cx="690" cy="85" r="46" fill="url(#erdeSchein)"/>
+        <circle cx="690" cy="85" r="30" fill="#2f7bd8"/>
+        <g clip-path="url(#erdeClip)">
+          <path fill="#3fbf6a" d="M670 68q9-9 18-2q7 6-2 13q-9 4-6 13q-7 5-11-4q-6-11 1-20z"/>
+          <path fill="#3fbf6a" d="M699 90q11-5 15 4q2 9-9 11q-9 0-6-15z"/>
+          <path fill="#3fbf6a" d="M692 58q7-2 11 2q-5 5-11-2z"/>
+          <path fill="none" stroke="#fff" stroke-opacity=".7" stroke-width="2.5" stroke-linecap="round" d="M664 98q8-3 14 0M700 70q6-3 12 1"/>
+          <path fill="#000" opacity=".35" d="M690 55a30 30 0 0 1 0 60a20 30 0 0 0 0-60z"/>
+        </g>
+
+        <!-- Mondboden mit Kratern -->
+        <path d="M0 342Q90 326 190 340T400 336T610 338T800 334V450H0Z" fill="url(#bodenVerlauf)"/>
+        <g class="krater">
+          <ellipse cx="72" cy="397" rx="44" ry="11" fill="#c3c6d0"/>
+          <ellipse cx="72" cy="395" rx="40" ry="9" fill="#787b87"/>
+          <ellipse cx="440" cy="384" rx="30" ry="8" fill="#c3c6d0"/>
+          <ellipse cx="440" cy="382" rx="27" ry="6.5" fill="#7c7f8b"/>
+          <ellipse cx="525" cy="422" rx="56" ry="13" fill="#b9bcc6"/>
+          <ellipse cx="525" cy="420" rx="51" ry="10.5" fill="#6f727e"/>
+          <ellipse cx="735" cy="398" rx="36" ry="9" fill="#c3c6d0"/>
+          <ellipse cx="735" cy="396" rx="32" ry="7" fill="#7a7d89"/>
+          <ellipse cx="300" cy="420" rx="22" ry="5" fill="#80838f"/>
+        </g>
+
+        <!-- Solarpanel -->
+        <g class="solarpanel">
+          <rect x="127" y="298" width="6" height="46" fill="#8a90a0"/>
+          <g transform="rotate(-15 130 296)">
+            <rect x="92" y="283" width="76" height="27" rx="2" fill="#1f4fa8" stroke="#c7d2ea" stroke-width="2"/>
+            <path d="M111 283V310M130 283V310M149 283V310M92 296.5H168" stroke="#8fb0ff" stroke-width="1.2"/>
+          </g>
+          <path d="M133 342Q160 352 186 341" stroke="#4b5060" stroke-width="2.5" fill="none"/>
+        </g>
+
+        <!-- Mondbasis -->
+        <g class="basis">
+          <line x1="280" y1="254" x2="280" y2="214" stroke="#8a90a0" stroke-width="4"/>
+          <path d="M262 226Q280 241 298 226" stroke="#c9cfdb" stroke-width="4" fill="none" stroke-linecap="round"/>
+          <circle class="antennen-licht" cx="280" cy="209" r="5" fill="#ff4d4d"/>
+          <path d="M180 345A100 92 0 0 1 380 345Z" fill="url(#kuppelVerlauf)" stroke="#8792a8" stroke-width="3"/>
+          <path d="M196 300Q280 284 364 300M222 270Q280 258 338 270" stroke="#bcc4d3" stroke-width="2" fill="none"/>
+          <rect x="172" y="338" width="216" height="12" rx="4" fill="#7d8597"/>
+          <circle id="schein1" class="fenster-schein" cx="245" cy="305" r="44" fill="url(#scheinVerlauf)"/>
+          <circle id="schein2" class="fenster-schein" cx="315" cy="305" r="44" fill="url(#scheinVerlauf)"/>
+          <circle cx="245" cy="305" r="20" fill="#6b7489"/>
+          <circle id="fenster1" class="fenster" cx="245" cy="305" r="15"/>
+          <circle cx="315" cy="305" r="20" fill="#6b7489"/>
+          <circle id="fenster2" class="fenster" cx="315" cy="305" r="15"/>
+          <rect x="266" y="306" width="28" height="36" rx="13" fill="#6b7489"/>
+          <rect x="270" y="310" width="20" height="32" rx="10" fill="#4a5266"/>
+          <text x="245" y="356" class="fenster-label" text-anchor="middle">LED 1</text>
+          <text x="315" y="356" class="fenster-label" text-anchor="middle">LED 2</text>
+        </g>
+
+        <!-- Startrampe -->
+        <g class="rampe">
+          <rect x="640" y="190" width="7" height="146" fill="#6d7385"/>
+          <rect x="665" y="190" width="7" height="146" fill="#6d7385"/>
+          <path d="M645 200L667 225L645 250L667 275L645 300L667 325" stroke="#8a90a2" stroke-width="3" fill="none"/>
+          <rect x="618" y="236" width="24" height="5" fill="#8a90a2"/>
+          <rect x="636" y="186" width="40" height="6" rx="2" fill="#8a90a2"/>
+          <rect x="556" y="334" width="120" height="10" rx="3" fill="#5c6274"/>
+          <rect x="568" y="344" width="8" height="7" fill="#4b5060"/>
+          <rect x="656" y="344" width="8" height="7" fill="#4b5060"/>
+        </g>
+
+        <!-- Rauch und Rakete -->
+        <g id="rauch"></g>
+        <g id="rakete" class="rakete">
+          <g class="raketen-koerper">
+            <g class="flammen">
+              <path d="M589 334Q600 412 611 334Z" fill="url(#flammeVerlauf)"/>
+              <path d="M594 334Q600 382 606 334Z" fill="#fff6c8"/>
+            </g>
+            <path d="M586 290L563 331L586 323Z" fill="#e8463c"/>
+            <path d="M614 290L637 331L614 323Z" fill="#e8463c"/>
+            <path d="M592 326H608L611 334H589Z" fill="#59606f"/>
+            <path d="M586 326V248Q586 222 600 204Q614 222 614 248V326Z" fill="#f1f3f8" stroke="#9aa3b8" stroke-width="2"/>
+            <path d="M600 205Q591 216 588.5 232H611.5Q609 216 600 205Z" fill="#e8463c"/>
+            <rect x="587" y="300" width="26" height="6" fill="#e8463c"/>
+            <circle cx="600" cy="262" r="8" fill="#5ad1ff" stroke="#9aa3b8" stroke-width="3"/>
+          </g>
+        </g>
+
+        <!-- Alien-Besuch (nur nachts) -->
+        <g id="alien" class="alien">
+          <g class="alien-koerper">
+            <rect x="-8" y="-14" width="5" height="14" rx="2" fill="#4fc460"/>
+            <rect x="3" y="-14" width="5" height="14" rx="2" fill="#4fc460"/>
+            <ellipse cx="0" cy="-24" rx="11" ry="13" fill="#6ee07a"/>
+            <line x1="-9" y1="-28" x2="-20" y2="-16" stroke="#6ee07a" stroke-width="4" stroke-linecap="round"/>
+            <g class="alien-arm">
+              <line x1="9" y1="-30" x2="22" y2="-45" stroke="#6ee07a" stroke-width="4" stroke-linecap="round"/>
+              <circle cx="22" cy="-45" r="3.5" fill="#6ee07a"/>
+            </g>
+            <line x1="-6" y1="-60" x2="-12" y2="-75" stroke="#6ee07a" stroke-width="2.5"/>
+            <line x1="6" y1="-60" x2="12" y2="-75" stroke="#6ee07a" stroke-width="2.5"/>
+            <circle cx="-12" cy="-76" r="3.5" fill="#ff5ad1"/>
+            <circle cx="12" cy="-76" r="3.5" fill="#ff5ad1"/>
+            <ellipse cx="0" cy="-49" rx="17" ry="14" fill="#7cf08a"/>
+            <ellipse cx="-6.5" cy="-51" rx="4.5" ry="6" fill="#111"/>
+            <ellipse cx="6.5" cy="-51" rx="4.5" ry="6" fill="#111"/>
+            <circle cx="-5" cy="-53" r="1.5" fill="#fff"/>
+            <circle cx="8" cy="-53" r="1.5" fill="#fff"/>
+            <path d="M-5 -42Q0 -38 5 -42" stroke="#1d5b26" stroke-width="2" fill="none" stroke-linecap="round"/>
+          </g>
+          <g class="sprechblase">
+            <rect x="22" y="-108" width="132" height="34" rx="12" fill="#fff"/>
+            <path d="M34 -75L26 -62L46 -75Z" fill="#fff"/>
+            <text x="88" y="-85" text-anchor="middle" class="sprechblase-text">Hallo Erde! 👋</text>
+          </g>
+        </g>
+        <g id="ufo" class="ufo">
+          <g class="ufo-schweben">
+            <polygon class="ufo-strahl" points="-20,12 20,12 62,240 -62,240" fill="url(#strahlVerlauf)"/>
+            <ellipse cx="0" cy="-8" rx="23" ry="19" fill="#a8ecff" fill-opacity=".9" stroke="#e6faff" stroke-width="2"/>
+            <circle cx="0" cy="-10" r="7" fill="#7cf08a"/>
+            <ellipse cx="0" cy="5" rx="60" ry="14" fill="#8e98ad" stroke="#5d6578" stroke-width="2"/>
+            <ellipse cx="0" cy="1" rx="42" ry="6" fill="#bcc5d6"/>
+            <circle class="ufo-licht" cx="-38" cy="7" r="3.5" fill="#ffe14d"/>
+            <circle class="ufo-licht" cx="-13" cy="10" r="3.5" fill="#ff5ad1"/>
+            <circle class="ufo-licht" cx="13" cy="10" r="3.5" fill="#5ad1ff"/>
+            <circle class="ufo-licht" cx="38" cy="7" r="3.5" fill="#ffe14d"/>
+          </g>
+        </g>
+
+        <text id="countdown" class="countdown" x="400" y="200" text-anchor="middle"></text>
+      </svg>
+      <div class="szenen-leiste">
+        <p id="szenenText" class="szenen-text" aria-live="polite">Es ist hell. Die Rakete wartet auf der Startrampe.</p>
+        <button id="btnAliens" class="knopf knopf-alien" type="button">👽 Aliens rufen</button>
+      </div>
+      <p id="alienHinweis" class="alien-hinweis" aria-live="polite" hidden></p>
+      <p class="hinweis klein">Fenster 1 zeigt LED 1, Fenster 2 zeigt LED 2. Wird es dunkel, startet die Rakete!</p>
+    </section>
+
+    <!-- Teil 2: Bauplan -->
+    <section id="panelBau" class="panel" role="tabpanel" aria-labelledby="tabBau" hidden>
+      <div class="bauplan-kopf">
+        <p>Tippe auf ein Bauteil, um zu erfahren, was es macht.</p>
+        <button id="btnTour" class="knopf" type="button">▶ Schritt für Schritt</button>
+      </div>
+
+      <div id="tourBox" class="tour-box" hidden aria-live="polite">
+        <strong id="tourTitel"></strong>
+        <p id="tourText"></p>
+        <div class="tour-knoepfe">
+          <button id="btnTourWeiter" class="knopf knopf-haupt" type="button">Weiter ▸</button>
+          <button id="btnTourEnde" class="knopf" type="button">Beenden</button>
+        </div>
+      </div>
+
+      <div id="bauplan" class="bauplan"></div>
+
+      <div id="info" class="infobox" aria-live="polite">
+        <strong id="infoTitel">Was ist was?</strong>
+        <p id="infoText">Fahre mit der Maus über ein Bauteil oder tippe darauf.</p>
+      </div>
+      <p class="hinweis klein">✨ Die Leuchtpunkte zeigen, wie der Strom fließt: von Plus (+) nach Minus (−).
+        So zeichnen es auch Technikerinnen und Techniker („technische Stromrichtung“).
+        Dicke, schnelle Punkte bedeuten viel Strom.</p>
+    </section>
+  </main>
+
+  <footer class="fuss">
+    <p>Seeed XIAO ESP32-S3 · Lichtsensor (LDR) · 2 LEDs · Schalter · Web Serial</p>
+  </footer>
+</div>
+
+<script src="js/serial.js"></script>
+<script src="js/scene.js"></script>
+<script src="js/schematic.js"></script>
+<script src="js/main.js"></script>
+</body>
+</html>

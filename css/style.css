@@ -1,0 +1,372 @@
+/* ===== Grundfarben (dunkles Weltraum-Design) ===== */
+:root {
+  --bg: #060a1c;
+  --panel: #111a3c;
+  --panel-rand: #27356f;
+  --knopf: #1f2b5c;
+  --knopf-rand: #3a4a94;
+  --text: #f2f5ff;
+  --muted: #aeb8dc;
+  --gelb: #ffd25a;
+  --blau: #5ad1ff;
+  --gruen: #4ade80;
+  --rot: #ff6b6b;
+  --radius: 16px;
+  color-scheme: dark;
+}
+
+* { box-sizing: border-box; }
+
+html { font-size: 18px; }
+
+body {
+  margin: 0;
+  min-height: 100vh;
+  background: radial-gradient(ellipse at top, #18245e 0%, var(--bg) 62%) fixed, var(--bg);
+  color: var(--text);
+  font-family: system-ui, "Segoe UI", Roboto, Arial, sans-serif;
+  line-height: 1.5;
+}
+
+.seite { max-width: 1100px; margin: 0 auto; padding: 16px; }
+
+h1 { font-size: clamp(1.8rem, 5vw, 2.5rem); margin: 0; line-height: 1.1; }
+h2 { font-size: 1.2rem; margin: 0 0 8px; }
+small { font-size: .75em; color: var(--muted); font-weight: 400; }
+
+/* ===== Kopfbereich ===== */
+.kopf {
+  display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between;
+  gap: 12px 24px; padding: 8px 0 16px;
+}
+.untertitel { margin: 6px 0 0; color: var(--muted); }
+.verbindung { display: flex; flex-wrap: wrap; align-items: center; gap: 10px; }
+
+.status {
+  display: inline-flex; align-items: center; gap: 8px;
+  padding: 6px 14px; border-radius: 999px; font-weight: 700;
+  background: #18214a; border: 2px solid #34428a;
+}
+.status::before { content: ""; width: 10px; height: 10px; border-radius: 50%; background: currentColor; }
+.status-sim { color: var(--blau); }
+.status-verbinde { color: var(--gelb); }
+.status-verbunden { color: var(--gruen); }
+.status-getrennt { color: var(--rot); }
+
+/* ===== Knöpfe ===== */
+.knopf {
+  font: inherit; font-weight: 700; color: var(--text);
+  min-height: 48px; padding: 10px 18px; cursor: pointer;
+  background: var(--knopf); border: 2px solid var(--knopf-rand); border-radius: 12px;
+  transition: background .15s, transform .1s;
+}
+.knopf:hover { background: #2a3a7c; }
+.knopf:active { transform: scale(.97); }
+.knopf:disabled { opacity: .5; cursor: not-allowed; }
+.knopf-haupt { background: var(--gelb); border-color: var(--gelb); color: #1d1500; }
+.knopf-haupt:hover { background: #ffe08a; }
+
+:focus-visible { outline: 3px solid var(--gelb); outline-offset: 2px; }
+
+/* ===== Meldungen ===== */
+.meldung {
+  margin: 0 0 16px; padding: 12px 16px; border-radius: 12px;
+  background: #13306a; border: 2px solid #2f5fb8;
+}
+.meldung.warnung { background: #4a3410; border-color: #c08a1e; }
+.meldung.fehler { background: #4a1620; border-color: #d0485c; }
+.meldung.ok { background: #123d2a; border-color: #2f9e64; }
+
+/* ===== Steuerung ===== */
+.steuerung { display: grid; grid-template-columns: 1.4fr 1fr; gap: 16px; margin-bottom: 20px; }
+@media (max-width: 760px) { .steuerung { grid-template-columns: 1fr; } }
+
+.karte {
+  background: var(--panel); border: 1px solid var(--panel-rand);
+  border-radius: var(--radius); padding: 16px 18px;
+}
+.karte-kopf { display: flex; justify-content: space-between; align-items: baseline; gap: 8px; }
+.wert { font-size: 1.6rem; font-weight: 800; font-variant-numeric: tabular-nums; color: var(--gelb); }
+
+/* LDR-Balken */
+.balken {
+  position: relative; height: 34px; margin: 34px 0 6px;
+  background: #0a1028; border: 2px solid #2c3a78; border-radius: 12px;
+}
+.balken-fuellung {
+  position: absolute; inset: 0;
+  border-radius: 10px;
+  background: linear-gradient(90deg, #2b3a96, #5ad1ff 50%, #ffd25a);
+  clip-path: inset(0 calc(100% - var(--wert, 50%)) 0 0 round 10px);
+  transition: clip-path .25s ease-out;
+}
+.marke {
+  position: absolute; top: -8px; bottom: -8px; width: 3px; margin-left: -1.5px;
+  background: #fff; border-radius: 2px; box-shadow: 0 0 0 1px #0008;
+}
+.marke span {
+  position: absolute; left: 50%; transform: translateX(-50%);
+  white-space: nowrap; font-size: .72rem; color: var(--muted);
+}
+.marke-dunkel span { bottom: calc(100% + 2px); }
+.marke-hell span { top: calc(100% + 2px); }
+.balken-skala {
+  display: flex; justify-content: space-between; margin-top: 22px;
+  font-size: .85rem; color: var(--muted);
+}
+
+/* Schieberegler */
+.regler { display: block; margin-top: 14px; }
+.regler-titel { display: block; font-weight: 700; margin-bottom: 4px; }
+.regler input { width: 100%; height: 36px; accent-color: var(--gelb); cursor: pointer; }
+.regler.aus { opacity: .4; }
+.hinweis { color: var(--muted); margin: 8px 0 0; }
+.hinweis.klein { font-size: .85rem; }
+
+/* Modus */
+.modus-knoepfe { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
+.modus-knopf {
+  display: flex; flex-direction: column; align-items: center; gap: 2px;
+  padding: 8px 6px; font-size: .9rem;
+}
+.modus-knopf span { font-size: 1.5rem; line-height: 1; }
+.modus-knopf[aria-pressed="true"] { background: var(--gelb); border-color: var(--gelb); color: #1d1500; }
+.zustand { margin: 14px 0 0; font-size: 1.05rem; }
+
+/* ===== Tabs ===== */
+.tabs { display: flex; gap: 8px; }
+.tab {
+  flex: 1 1 0; font: inherit; font-size: 1.15rem; font-weight: 700; cursor: pointer;
+  padding: 12px; min-height: 52px;
+  color: var(--muted); background: #121a40;
+  border: 2px solid var(--panel-rand); border-bottom: none; border-radius: 14px 14px 0 0;
+}
+.tab[aria-selected="true"] { color: var(--text); background: var(--panel); }
+.panel {
+  background: var(--panel); border: 2px solid var(--panel-rand); border-top: none;
+  border-radius: 0 0 var(--radius) var(--radius); padding: 16px;
+}
+
+/* ===== Teil 1: Mondszene ===== */
+.szene { display: block; width: 100%; height: auto; border-radius: 12px; overflow: hidden; }
+.szenen-text { font-size: 1.15rem; font-weight: 700; margin: 12px 0 0; min-height: 1.6em; }
+
+.himmel-oben { stop-color: #1f3a86; transition: stop-color 2.5s; }
+.himmel-unten { stop-color: #4a6fc4; transition: stop-color 2.5s; }
+.szene.dunkel .himmel-oben { stop-color: #000003; }
+.szene.dunkel .himmel-unten { stop-color: #0b1030; }
+
+.sterne { opacity: .2; transition: opacity 2.5s; }
+.szene.dunkel .sterne { opacity: 1; }
+.stern { fill: #fff; }
+.szene.dunkel .stern { animation: funkeln var(--d, 3s) ease-in-out var(--v, 0s) infinite; }
+@keyframes funkeln { 0%, 100% { opacity: 1; } 50% { opacity: .2; } }
+
+.fenster { fill: #2b3350; transition: fill .6s; }
+.fenster.an { fill: #ffd25a; }
+.fenster-schein { opacity: 0; transition: opacity .8s; }
+.fenster-schein.an { opacity: 1; }
+.fenster-label { font-size: 13px; font-weight: 700; fill: #2c3346; }
+
+.antennen-licht { animation: blinken 1.4s steps(1) infinite; }
+@keyframes blinken { 50% { opacity: .15; } }
+
+/* Rakete: hoch fliegen und landen über CSS-Übergänge */
+.rakete { transition: transform 3.5s cubic-bezier(.55, 0, .85, .4); }
+.rakete.oben { transform: translateY(-600px); }
+.rakete.landet { transition: transform 4.2s cubic-bezier(.15, .55, .35, 1); }
+
+.flammen { opacity: 0; transition: opacity .3s; transform-box: fill-box; transform-origin: 50% 0; }
+.szene[data-phase="zuendung"] .flammen,
+.szene[data-phase="flug"] .flammen { opacity: 1; animation: flackern .12s ease-in-out infinite alternate; }
+.szene[data-phase="landung"] .flammen { opacity: 1; animation: flackern-klein .12s ease-in-out infinite alternate; }
+@keyframes flackern { from { transform: scaleY(.85); } to { transform: scaleY(1.2); } }
+@keyframes flackern-klein { from { transform: scaleY(.35); } to { transform: scaleY(.55); } }
+
+.szene[data-phase="zuendung"] .raketen-koerper,
+.szene[data-phase="flug"] .raketen-koerper { animation: wackeln .09s linear infinite; }
+@keyframes wackeln {
+  0%, 100% { transform: translate(0, 0); }
+  25% { transform: translate(-1.6px, .6px); }
+  50% { transform: translate(1.6px, -.6px); }
+  75% { transform: translate(-1px, 0); }
+}
+
+.rauch-teil {
+  fill: #d6d9e2; transform-box: fill-box; transform-origin: center;
+  animation: rauch 1.8s ease-out forwards;
+}
+@keyframes rauch {
+  from { opacity: .85; transform: translate(0, 0) scale(.6); }
+  to { opacity: 0; transform: translate(var(--dx), var(--dy)) scale(3.2); }
+}
+
+.countdown {
+  font-size: 120px; font-weight: 900; fill: #fff;
+  paint-order: stroke; stroke: #000a; stroke-width: 6px;
+  opacity: 0; transform-box: fill-box; transform-origin: center;
+}
+.countdown.zeigen { animation: pop .9s ease-out forwards; }
+@keyframes pop {
+  0% { opacity: 0; transform: scale(.4); }
+  20% { opacity: 1; transform: scale(1.1); }
+  70% { opacity: 1; transform: scale(1); }
+  100% { opacity: 0; transform: scale(1); }
+}
+
+/* ===== Alien-Besuch ===== */
+.szenen-leiste {
+  display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between;
+  gap: 8px 16px; margin-top: 12px;
+}
+.szenen-leiste .szenen-text { margin: 0; flex: 1 1 260px; }
+.knopf-alien { background: #1f6b3a; border-color: #4fc460; }
+.knopf-alien:hover { background: #2a8a4c; }
+.knopf-alien.tag { opacity: .7; }
+.alien-hinweis {
+  margin: 8px 0 0; padding: 10px 14px; border-radius: 12px;
+  background: #16361f; border: 2px solid #4fc460;
+}
+
+/* UFO: kommt von links, schwebt über dem Mond, fliegt nach rechts weg */
+.ufo { transform: translate(-120px, 60px); transition: transform 2.6s cubic-bezier(.2, .7, .3, 1); }
+.szene[data-aliens="da"] .ufo,
+.szene[data-aliens="runter"] .ufo,
+.szene[data-aliens="winkt"] .ufo,
+.szene[data-aliens="hoch"] .ufo { transform: translate(470px, 105px); }
+.szene[data-aliens="weg"] .ufo { transform: translate(960px, -40px); transition: transform 1.6s cubic-bezier(.6, 0, .9, .5); }
+.ufo-schweben { animation: schweben 1.8s ease-in-out infinite alternate; }
+@keyframes schweben { from { transform: translateY(-4px); } to { transform: translateY(4px); } }
+.ufo-strahl { opacity: 0; transition: opacity .5s; }
+.szene[data-aliens="runter"] .ufo-strahl,
+.szene[data-aliens="hoch"] .ufo-strahl { opacity: 1; }
+.ufo-licht { animation: blinken .8s steps(1) infinite; }
+.ufo-licht:nth-of-type(2n) { animation-delay: -.4s; }
+
+/* Alien: wird aus dem UFO herunter- und wieder hochgebeamt */
+.alien { transform: translate(470px, 346px); opacity: 0; transition: opacity .3s; }
+.szene[data-aliens="runter"] .alien,
+.szene[data-aliens="winkt"] .alien,
+.szene[data-aliens="hoch"] .alien { opacity: 1; }
+.alien-koerper {
+  transform-box: fill-box; transform-origin: 50% 100%;
+  transform: translateY(-225px) scale(.25);
+  transition: transform 1.6s ease-in-out;
+}
+.szene[data-aliens="runter"] .alien-koerper,
+.szene[data-aliens="winkt"] .alien-koerper { transform: translateY(0) scale(1); }
+.alien-arm { transform-box: fill-box; transform-origin: 0% 100%; }
+.szene[data-aliens="winkt"] .alien-arm { animation: winken .45s ease-in-out infinite alternate; }
+@keyframes winken { from { transform: rotate(-25deg); } to { transform: rotate(25deg); } }
+.sprechblase { opacity: 0; transition: opacity .4s; }
+.szene[data-aliens="winkt"] .sprechblase { opacity: 1; }
+.sprechblase-text { font-size: 17px; font-weight: 800; fill: #1b2340; }
+
+/* Alien-Störung: LED 2 / Fenster 2 flackert */
+.szene.alien-stoerung #fenster2 { animation: flackern-fenster .9s steps(1) infinite; }
+.szene.alien-stoerung #schein2 { animation: flackern-schein .9s steps(1) infinite; }
+.led.flackert .led-koerper { animation: flackern-led .9s steps(1) infinite; }
+.led.flackert .led-schein { animation: flackern-schein .9s steps(1) infinite; }
+@keyframes flackern-fenster {
+  0%, 22%, 41%, 63%, 80% { fill: #ffd25a; }
+  12%, 30%, 52%, 70%, 90% { fill: #2b3350; }
+}
+@keyframes flackern-led {
+  0%, 22%, 41%, 63%, 80% { fill: #ffe14d; fill-opacity: 1; }
+  12%, 30%, 52%, 70%, 90% { fill: #b8a53a; fill-opacity: .45; }
+}
+@keyframes flackern-schein {
+  0%, 22%, 41%, 63%, 80% { opacity: 1; }
+  12%, 30%, 52%, 70%, 90% { opacity: 0; }
+}
+
+/* ===== Teil 2: Bauplan ===== */
+.bauplan-kopf {
+  display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between;
+  gap: 8px 16px; margin-bottom: 12px;
+}
+.bauplan-kopf p { margin: 0; }
+.bauplan svg { display: block; width: 100%; height: auto; }
+
+.tour-box {
+  margin-bottom: 12px; padding: 12px 16px; border-radius: 12px;
+  background: #2a2350; border: 2px solid var(--gelb);
+}
+.tour-box strong { font-size: 1.15rem; color: var(--gelb); }
+.tour-box p { margin: 6px 0 10px; }
+.tour-knoepfe { display: flex; flex-wrap: wrap; gap: 8px; }
+
+.infobox {
+  margin-top: 12px; padding: 12px 16px; border-radius: 12px;
+  background: #0d1533; border: 2px solid var(--panel-rand); min-height: 5.5em;
+}
+.infobox strong { font-size: 1.1rem; color: var(--blau); }
+.infobox p { margin: 4px 0 0; }
+
+.steckbrett { fill: #ece6d3; }
+.kabel { fill: none; stroke-width: 7; stroke-linecap: round; stroke-linejoin: round; }
+.treffer { fill: none; stroke: transparent; stroke-width: 22; stroke-linecap: round; stroke-linejoin: round; }
+.bein { fill: none; stroke: #8d939e; stroke-width: 3; stroke-linecap: round; }
+.beschriftung { font-size: 15px; font-weight: 700; fill: #2a2a2a; }
+.beschriftung-hell { font-size: 15px; font-weight: 700; fill: #fff; }
+.messwert { font-size: 14px; font-weight: 700; fill: #6b5500; }
+
+.xiao-platine { fill: #1e4580; stroke: #0f2a52; stroke-width: 3; }
+.pin { fill: #d4a72c; transition: fill .3s; }
+.pin.high { fill: #ffe14d; filter: drop-shadow(0 0 4px #ffe14d); }
+
+.widerstand-koerper { fill: #e6cf9e; stroke: #b39457; stroke-width: 1.5; }
+.ldr-koerper { fill: #d98c4a; stroke: #9c5a24; stroke-width: 2; }
+
+.led-koerper { fill: #b8a53a; fill-opacity: .45; stroke: #6d6324; stroke-width: 1.5; transition: fill .3s, fill-opacity .3s; }
+.led-rand { fill: #b8a53a; fill-opacity: .6; stroke: #6d6324; stroke-width: 1.5; }
+.led-schein { opacity: 0; transition: opacity .3s; }
+.led.an .led-koerper { fill: #ffe14d; fill-opacity: 1; }
+.led.an .led-schein { opacity: 1; }
+
+.schalter-koerper { fill: #2d3240; stroke: #151821; stroke-width: 2; }
+.schalter-hebel {
+  stroke: #ffcc33; stroke-width: 5; stroke-linecap: round;
+  transform-box: view-box; transform-origin: 420px 416px;
+  transform: rotate(40deg); transition: transform .25s;
+}
+.schalter.zu .schalter-hebel { transform: rotate(0deg); }
+
+.licht-pfeile { stroke: #ffae00; stroke-width: 3; fill: none; stroke-linecap: round; }
+
+.bauteil { cursor: pointer; }
+.bauteil:focus { outline: none; }
+.bauteil.gewaehlt, .bauteil:focus-visible { filter: drop-shadow(0 0 5px #ff9d00) drop-shadow(0 0 2px #ff9d00); }
+
+/* Stromfluss: wandernde Leuchtpunkte */
+.fluss {
+  fill: none; stroke-linecap: round; stroke-linejoin: round;
+  stroke-dasharray: 0 22; opacity: 0; pointer-events: none;
+  transition: opacity .4s;
+}
+.fluss.aktiv { opacity: 1; animation: fliessen var(--dauer, 1s) linear infinite; }
+.fluss-led { stroke: #fff4a8; stroke-width: 9; filter: drop-shadow(0 0 4px #ffd000); }
+.fluss-sensor, .fluss-schalter { stroke: #c4f1ff; stroke-width: 4.5; filter: drop-shadow(0 0 2px #5ad1ff); }
+@keyframes fliessen { to { stroke-dashoffset: -44; } }
+
+/* Schritt-für-Schritt: Rest abdunkeln */
+.tour .teil { opacity: .15; transition: opacity .4s; }
+.tour.schritt-1 .teil[data-schritt~="1"],
+.tour.schritt-2 .teil[data-schritt~="2"],
+.tour.schritt-3 .teil[data-schritt~="3"] { opacity: 1; }
+.tour .fluss.teil:not(.aktiv) { opacity: 0; }
+
+/* ===== Fuß ===== */
+.fuss { color: var(--muted); font-size: .8rem; text-align: center; padding: 20px 0 8px; }
+
+/* ===== Weniger Bewegung ===== */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: .01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: .01ms !important;
+  }
+  .fluss.aktiv { animation: none; }       /* Punkte bleiben stehen, sind aber sichtbar */
+  .countdown.zeigen { animation: none; opacity: 1; }
+  .szene.dunkel .stern { animation: none; }
+}
